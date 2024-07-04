@@ -38,7 +38,7 @@ cd maple-forum
 pip install -r requirements.txt
 
 # 修改配置文件
-# 修改config.py中的数据库配置
+# 修改da.py中的数据库配置
 # 创建MySQL数据库
 
 # 迁移MySQL数据库
