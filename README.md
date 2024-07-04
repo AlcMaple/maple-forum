@@ -22,7 +22,7 @@ cd maple-FFe
 npm install
 
 # 启动服务
-npm run serve
+npm run dev
 ```
 
 ## 后端
