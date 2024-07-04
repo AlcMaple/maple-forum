@@ -38,8 +38,8 @@ cd maple-forum
 pip install -r requirements.txt
 
 # 修改配置文件
-# 修改da.py中的数据库配置
-# 创建MySQL数据库
+# 修改database.py中的数据库配置
+# 创建MySQL数据库 
 
 # 迁移MySQL数据库
 mysql -u your_local_user -p your_local_database -P your_local_port < forum.sql
