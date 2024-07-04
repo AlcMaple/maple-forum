@@ -50,5 +50,4 @@ python run.py
 
 # 感谢
 
-- [vue3-forum](https://github.com/Shiftqueue/vue3-forum)
 - 所有开源软件组织&开发者
