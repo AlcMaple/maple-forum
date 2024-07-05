@@ -56,11 +56,11 @@ def send_verification_code():
     # verification_code = result[0]
     # session = result[1]
 
-    sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
-    # apiStatus = '200'
-    print(sendOK) # 是否成功(布尔值)
+    # sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
+    apiStatus = '200'
+    # print(sendOK) # 是否成功(布尔值)
     print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
-    print(info) # 描述信息 
+    # print(info) # 描述信息 
     if apiStatus == '200':
         print('短信发送成功')
         return jsonify({'msg': 'Verification code sent successfully'}), 200

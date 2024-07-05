@@ -7,7 +7,7 @@ def create_connection():
     try:
         connect=pymysql.Connect(
             host='localhost',
-            port=7777,
+            port=3306,
             user='root',
             passwd='loveat2024a+.',
             db='forum',
