@@ -536,6 +536,7 @@ const types = ref([
     tagId: 5,
   },
 ]);
+
 '''
 def get_all_types_db():
     connection = create_connection()
@@ -554,3 +555,97 @@ def get_all_types_db():
 
     cursor.close()
     return type_list, 200
+
+'''
+// 热评
+export function getIndexTime(){
+    return httpInstance({
+        url:'/api/index/time',
+        method:'get',
+    })
+}
+
+getIndexTime().then(res => {
+    articleList.value = res.data.page.list;
+    console.log('首页返回数据',articleList.value);
+  });
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(20) UNIQUE NOT NULL,
+    email VARCHAR(120) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    phone VARCHAR(20) UNIQUE,
+    description TEXT,
+    user_name varchar(225),
+    image varchar(225)
+);
+
+用户文章表
+create table articles(
+    aid int auto_increment primary key,
+    title varchar(225) not null,
+    content text not null,
+    description text,
+    uid int,
+    like_count int,
+    page_view int,
+    create_time datetime default current_timestamp,
+    update_time datetime,
+    tagIds json,
+    typeId int,
+    constraint uid foreign key(uid) references users(id)
+);
+
+分类表
+create table types(
+    ttag_id int auto_increment primary key,
+    tname varchar(225) not null
+)
+'''
+def get_index_time_db():
+    connection = create_connection()
+    cursor = connection.cursor()
+    
+    # 进行多表查询，获取aid、user_name、title、create_time、image、like_count、page_view、tname
+    cursor.execute("""
+                   SELECT 
+                   a.aid, 
+                   u.user_name, 
+                   a.create_time, 
+                   a.description, 
+                   a.like_count, 
+                   a.page_view, 
+                   a.title, 
+                   t.tname,
+                   a.image,
+                   a.update_time FROM 
+                   articles a 
+                   INNER JOIN 
+                   users u ON a.uid = u.id 
+                   INNER JOIN types t ON a.typeId = t.ttag_id 
+                   ORDER BY 
+                   a.create_time DESC
+        """)
+
+    result = cursor.fetchall()
+    if not result:
+        cursor.close()
+        return jsonify({'error': 'No articles found'}), 400
+    article_list = []
+    for article in result:
+        article_list.append({
+            'aid': article[0],
+            'author': article[1],
+            'createTime': article[2],
+            'description': article[3],
+            'likeCount': article[4],
+            'pageView': article[5],
+            'title': article[6],
+            'tname': article[7],
+            'image': article[8],
+            'update_time': article[9],
+        })
+
+    cursor.close()
+    return article_list, 200

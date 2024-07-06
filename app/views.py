@@ -523,3 +523,21 @@ def get_all_types():
         return jsonify({'code':400,'msg':'Types not found'})
     
     return jsonify({'code':200,'msg':'Types found successfully','data':respnse_result})
+
+'''
+// 热评
+export function getIndexTime(){
+    return httpInstance({
+        url:'/api/index/time',
+        method:'get',
+    })
+}
+
+getIndexTime().then(res => {
+    articleList.value = res.data.page.list;
+    console.log('首页返回数据',articleList.value);
+  });
+'''
+@bp.route('/api/index/time',methods=['get'])
+def get_index_time():
+    result_sponse,result_code = get_index_time_db()
