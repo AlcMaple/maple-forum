@@ -541,3 +541,43 @@ getIndexTime().then(res => {
 @bp.route('/api/index/time',methods=['get'])
 def get_index_time():
     result_sponse,result_code = get_index_time_db()
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Article not found'})
+    
+    print((str(result_sponse)))
+    return jsonify({'code':200,'msg':'Article found successfully','data':result_sponse})
+
+'''
+export function handleThumb(aid, likeCount) {
+    return httpInstance({
+        url: `/article/${aid}/like`,
+        method: 'post',
+        data: {
+            likeCount: likeCount
+        }
+    });
+}
+
+const handleLikeClick = async (event, article) => {
+  event.stopPropagation();
+  article.likeCount++;
+
+  handleThumb(article.aid, article.likeCount).then((res) => {
+    console.log(res);
+  });
+};
+'''
+@bp.route('/article/<int:aid>/like',methods=['post'])
+def handle_like_click(aid):
+    data = json_response(request)
+    likeCount = data.get('likeCount')
+    uid = data.get('uid')
+    # print("当前文章的aid：",aid)
+    # print("当前文章的likeCount：",likeCount)
+    print("当前用户的uid：",uid)
+    response_result,response_code = handle_like_click_db(aid,likeCount,uid)
+    print("点赞响应结果：",response_result)
+    if response_code != 200:
+        return jsonify({'code':400,'msg':'Article not found'})
+    
+    return jsonify({'code':200,'msg':'Article found successfully','data':response_result})

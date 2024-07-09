@@ -100,6 +100,7 @@ def get_current_path():
 def download_image(image_data,uid):
     current_dir = get_current_path()
     imgs_dir = os.path.join(current_dir, '../../vue3-forum/src/assets/imgs')
+    # imgs_dir = os.path.join(current_dir, '../../maple-FFe/src/assets/imgs')
 
     os.makedirs(imgs_dir, exist_ok=True)
 
@@ -110,6 +111,7 @@ def download_image(image_data,uid):
 def check_image_exist(uid):
     current_dir = get_current_path()
     imgs_dir = os.path.join(current_dir, '../../vue3-forum/src/assets/imgs')
+    # imgs_dir = os.path.join(current_dir, '../../maple-FFe/src/assets/imgs')
 
     img_path = os.path.join(imgs_dir, "uid{}.jpg".format(uid))
 

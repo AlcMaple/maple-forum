@@ -24,9 +24,9 @@ DROP TABLE IF EXISTS `articles`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `articles` (
   `aid` int NOT NULL AUTO_INCREMENT,
-  `title` varchar(225) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `content` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
+  `title` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `uid` int DEFAULT NULL,
   `like_count` int DEFAULT NULL,
   `page_view` int DEFAULT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `articles` (
   PRIMARY KEY (`aid`),
   KEY `uid` (`uid`),
   CONSTRAINT `uid` FOREIGN KEY (`uid`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -46,7 +46,7 @@ CREATE TABLE `articles` (
 
 LOCK TABLES `articles` WRITE;
 /*!40000 ALTER TABLE `articles` DISABLE KEYS */;
-INSERT INTO `articles` VALUES (1,'vue3入门教学','# 入门教程\n学好vue3是你找到工作的第一部基础','vue3是一个前端框架',1,NULL,NULL,'2024-06-26 09:18:44',NULL,'[1, 2, 3, 4]',4);
+INSERT INTO `articles` VALUES (1,'vue3入门教学','# 入门教程\n学好vue3是你找到工作的第一部基础','vue3是一个前端框架',1,3,1,'2024-06-26 09:18:44',NULL,'[1, 2, 3, 4]',4),(2,'test','test','test',2,4,0,'2024-07-06 11:33:47',NULL,'[1, 2]',1),(3,'qqqqqqqq','qwqweqwe','qqqqqqqq',2,12,1,'2024-07-06 11:35:56',NULL,'[6, 5, 7, 3]',5),(4,'测试点赞功能','测试点赞功能','测试',1,1,2,'2024-07-09 11:14:44',NULL,'[6, 7]',1);
 /*!40000 ALTER TABLE `articles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -59,12 +59,12 @@ DROP TABLE IF EXISTS `comments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `comments` (
   `com_id` int NOT NULL AUTO_INCREMENT,
-  `pnickname` varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pnickname` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `aid` int DEFAULT NULL,
-  `content` text COLLATE utf8mb4_unicode_ci,
+  `content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `parentComId` int DEFAULT NULL,
   `uid` int DEFAULT NULL,
-  `sub_content` text COLLATE utf8mb4_unicode_ci,
+  `sub_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`com_id`),
   KEY `fk_uid` (`uid`),
@@ -92,7 +92,7 @@ DROP TABLE IF EXISTS `types`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `types` (
   `ttag_id` int NOT NULL AUTO_INCREMENT,
-  `tname` varchar(225) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tname` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`ttag_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -116,18 +116,19 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `username` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `email` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci,
-  `user_name` varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `image` varchar(225) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `username` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `user_name` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(225) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `like_article_ids` json DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `phone` (`phone`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -136,7 +137,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'1234','2933724627@qq.com','scrypt:32768:8:1$rWe9MKTaUXzl9MIV$bd918457ffb7658700ebc4cb032e0f3b4648fe0a340be00c00a61cdea74205c4109ea3c8603832ce40a639bbf923e12be2cf3d62752b82f614f0c376b2eb2e20','13825600730','七点下班','Alc','src/assets/imgs/uid1.jpg');
+INSERT INTO `users` VALUES (1,'1234','2933724627@qq.com','scrypt:32768:8:1$rWe9MKTaUXzl9MIV$bd918457ffb7658700ebc4cb032e0f3b4648fe0a340be00c00a61cdea74205c4109ea3c8603832ce40a639bbf923e12be2cf3d62752b82f614f0c376b2eb2e20','13825600730','七点下班','Alc','src/assets/imgs/uid1.jpg','[0, 2, 3, 1, 4]'),(2,'2345','5844759584@qq.com','scrypt:32768:8:1$m6CiSFK9744qxPVb$1542a292884c98dfeb495cee1083714da6b93cec24886cdd8a8270f200e7fd3692efe4957df7d2d580f5405fdf95490577b052d4f313166054cd27f59a62d19c','18217599685','你还没有介绍自己呢！！！','user_17200956906721',NULL,NULL);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -149,4 +150,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-04 10:26:48
+-- Dump completed on 2024-07-09 23:11:57

@@ -7,7 +7,8 @@ def create_connection():
     try:
         connect=pymysql.Connect(
             host='localhost',
-            port=3306,
+            port=7777,
+            # port=3306,
             user='root',
             passwd='loveat2024a+.',
             db='forum',
@@ -56,7 +57,21 @@ def register_user(username,email, password, phone,user_name):
     print('加密完成，继续创建用户')
     
     # 插入用户数据到数据库
-    cursor.execute("INSERT INTO users(username, email,password_hash,phone,description,user_name) VALUES (%s,%s, %s,%s,%s,%s)", (username, email, password_hash,phone,"你还没有介绍自己呢！！！",user_name))
+    cursor.execute("""
+                   INSERT INTO 
+                   users(
+                   username, 
+                   email,
+                   password_hash,
+                   phone,
+                   description,
+                   user_name,
+                   image,
+                   like_article_ids
+                   ) VALUES (%s,%s, %s,%s,%s,%s,%s,%s)", 
+                   (
+                   username, email, password_hash,phone,"你还没有介绍自己呢！！！",user_name,"src/assets/imgs/uid1.jpg",json.dumps([0]))
+                   """)
 
     print('插入数据库完成，开始事务')
 
@@ -190,7 +205,7 @@ def add_article_db(title, content, description, uid,tagIds,typeId):
     cursor = connection.cursor()
     tagIds = array_to_json(tagIds)
     # print('tagIds:',tagIds)
-    cursor.execute("INSERT INTO articles(title, content, description, uid,tagIds,typeId) VALUES (%s,%s,%s,%s,%s,%s)", (title, content, description, uid,tagIds,typeId))
+    cursor.execute("INSERT INTO articles(title, content, description, uid,tagIds,typeId,page_view) VALUES (%s,%s,%s,%s,%s,%s,%s)", (title, content, description, uid,tagIds,typeId,0))
     connection.commit()
     cursor.close()
     return jsonify({'message': 'Article added successfully'}), 200
@@ -231,6 +246,30 @@ def get_article_list_db(uid):
     cursor.close()
     return article_list, 200
 
+    
+# 获取文章标签
+def get_tags(tags_data):
+    res=[]
+    connection = create_connection()
+    cursor = connection.cursor()
+
+    for i in tags_data:
+        cursor.execute("SELECT tname FROM types WHERE ttag_id = %s", (i,))
+        result = cursor.fetchone()
+        if result:
+            res.append({'name': result[0]})
+    cursor.close()
+    return res
+
+# 添加文章观看次数
+def add_article_views_db(aid):
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("UPDATE articles SET page_view=page_view+1 WHERE aid=%s", (aid,))
+    connection.commit()
+    cursor.close()
+    return 200
+
 '''
 // 根据aid 获取文章信息
 export function getArticleDetails(aid) {
@@ -249,13 +288,14 @@ onMounted: {
 }
 '''
 def get_article_details_db(aid):
-
+    # print("检查")
     connection = create_connection()
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM articles WHERE aid = %s", (aid,))
     result = cursor.fetchone()
     print("result:",result)
     if not result:
+        # print("检查是否有执行这个地方")
         cursor.close()
         return jsonify({'error': 'Article does not exist'}), 400
     article = {
@@ -268,6 +308,8 @@ def get_article_details_db(aid):
         'typeId':result[10],
     }
 
+    code = add_article_views_db(aid)
+
     # 获取文章分类
     # cursor.execute("SELECT tname FROM types WHERE ttag_id = %s", (result[10],))
     # result = cursor.fetchone()
@@ -276,11 +318,7 @@ def get_article_details_db(aid):
 
     tags_data = json.loads(result[9])
 
-    for i in tags_data:
-        cursor.execute("SELECT tname FROM types WHERE ttag_id = %s", (i,))
-        result = cursor.fetchone()
-        if result:
-            article['tags'].append({'name': result[0]})
+    article['tags'] = get_tags(tags_data)
     cursor.close()
     return article, 200
 
@@ -607,7 +645,6 @@ def get_index_time_db():
     connection = create_connection()
     cursor = connection.cursor()
     
-    # 进行多表查询，获取aid、user_name、title、create_time、image、like_count、page_view、tname
     cursor.execute("""
                    SELECT 
                    a.aid, 
@@ -618,8 +655,9 @@ def get_index_time_db():
                    a.page_view, 
                    a.title, 
                    t.tname,
-                   a.image,
-                   a.update_time FROM 
+                   u.image,
+                   a.update_time,
+                   a.tagIds FROM 
                    articles a 
                    INNER JOIN 
                    users u ON a.uid = u.id 
@@ -628,13 +666,15 @@ def get_index_time_db():
                    a.create_time DESC
         """)
 
+    # cursor.execute('SELECT a.aid, u.user_name, a.create_time, a.description, a.like_count, a.page_view, a.title, u.image, a.update_time, a.tagIds FROM articles a INNER JOIN users u ON a.uid = u.id ORDER BY a.create_time DESC')
+
     result = cursor.fetchall()
     if not result:
         cursor.close()
         return jsonify({'error': 'No articles found'}), 400
     article_list = []
     for article in result:
-        article_list.append({
+        article_dict = {
             'aid': article[0],
             'author': article[1],
             'createTime': article[2],
@@ -642,10 +682,107 @@ def get_index_time_db():
             'likeCount': article[4],
             'pageView': article[5],
             'title': article[6],
-            'tname': article[7],
-            'image': article[8],
-            'update_time': article[9],
-        })
+            'type': article[7],
+            'uavator': article[8],
+            'update_time': article[9]
+        }
+
+        tags_data = json.loads(article[10])
+
+        # 获取文章标签
+        article_dict['tags'] = get_tags(tags_data)
+
+        article_list.append(article_dict)
 
     cursor.close()
     return article_list, 200
+
+# 处理用户点赞记录
+def handle_like_records_db(uid,aid):
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("select like_article_ids from users where id = %s", (uid,))
+    result = cursor.fetchone()
+    # 加载MySQL的json数据为列表
+    
+    # like_records = 1
+    # print("点赞记录：",like_records)
+    like_records = json.loads(result[0])
+    print("点赞记录：",like_records)
+    if result[0] is not None:
+        
+        # 查询用户是否有点赞过
+        # list_result = list(result)
+        for i in like_records:
+            # print("i=",i)
+            if i == aid:
+                print("用户已经点赞过该文章")
+                cursor.close()
+                return 0
+
+    # if result[0] is None:
+    #     result = ()
+    #     print("用户没有点赞记录")
+    
+    # 更新用户点赞记录，添加已点赞该aid的记录
+    # 将result元组转换为列表
+    # list_result = list(result)
+    like_records.append(aid)
+    # print("转换为列表后的结果：",list_result)
+    # 转换为json格式的数据后的结果
+    print("更新后的点赞记录：",json.dumps(like_records))
+    # 更新json格式的数据
+    cursor.execute("UPDATE users SET like_article_ids = %s WHERE id = %s", (json.dumps(like_records),uid))
+    connection.commit()
+    cursor.close()
+    return 200
+
+'''
+const handleLikeClick = async (event, article) => {
+  event.stopPropagation();
+  article.likeCount++;
+
+  try {
+    // 发送请求到服务器更新 likeCount
+    await axios.put(`/api/articles/${article.aid}/like`, {
+      likeCount: article.likeCount,
+    });
+    console.log("点赞成功");
+  } catch (error) {
+    console.error("点赞失败", error);
+    // 如果更新失败，恢复本地的 likeCount
+    article.likeCount--;
+  }
+};
+
+@bp.route('/api/articles/<int:aid>/like',methods=['PUT'])
+def handle_like_click(aid):
+    data = json_response(request)
+    print("点赞的文章id：",aid)
+    like_count = data.get('likeCount')
+    print("点赞的次数：",like_count)
+    # 发送请求到服务器更新 likeCount
+    response_result,response_code = handle_like_click_db(aid,like_count)
+    if response_code != 200:
+        return jsonify({'code':400,'msg':'Article not found'})
+    
+    return jsonify({'code':200,'msg':'Article found successfully','data':response_result})
+
+'''
+def handle_like_click_db(aid,like_count,uid):
+    
+    # 处理用户的点赞记录
+    result = handle_like_records_db(uid,aid)
+    print("点赞记录处理结果：",type(result))
+    if result == 200:
+        connection = create_connection()
+        cursor = connection.cursor()
+        print("点赞成功")
+        
+        cursor.execute("UPDATE articles SET like_count = %s WHERE aid = %s", (like_count,aid))
+        connection.commit()
+    
+        cursor.close()
+        return like_count, 200
+    
+    return jsonify({'error': 'Article not found'}), 400

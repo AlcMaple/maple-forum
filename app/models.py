@@ -14,7 +14,8 @@ CREATE TABLE users (
     phone VARCHAR(20) UNIQUE,
     description TEXT,
     user_name varchar(225),
-    image varchar(225)
+    image varchar(225),
+    like_article_ids json,
 );
 '''
 
