@@ -20,9 +20,10 @@ def str_to_dict(data):
 # 定义四位数的随机验证码
 def generate_verification_code():
     verification_code = str(random.randint(1000, 9999))
-    verification_code='7420'
+    # verification_code='7420'
     return verification_code
 
+# 发送短信验证码
 def send_sms(phone_number,session):
 
     # 生成验证码

@@ -3,6 +3,7 @@ from flask import jsonify
 from werkzeug.security import generate_password_hash,check_password_hash
 import json
 
+# 创建数据库连接
 def create_connection():
     try:
         connect=pymysql.Connect(
@@ -24,6 +25,7 @@ def create_connection():
 
     return connect
 
+# 注册用户
 def register_user(username,email, password, phone,user_name):
     connection = create_connection()
     cursor = connection.cursor()
@@ -84,6 +86,7 @@ def register_user(username,email, password, phone,user_name):
     # 返回成功信息
     return jsonify({'message': 'User registered successfully'}), 200
 
+# 登录用户
 def login_user(username, password):
     connection = create_connection()
     cursor = connection.cursor()
@@ -210,6 +213,7 @@ def add_article_db(title, content, description, uid,tagIds,typeId):
     cursor.close()
     return jsonify({'message': 'Article added successfully'}), 200
 
+# 获取文章列表
 '''
 获取用户文章标题列表
 export function getUserArticleList() {
@@ -245,8 +249,7 @@ def get_article_list_db(uid):
         })
     cursor.close()
     return article_list, 200
-
-    
+  
 # 获取文章标签
 def get_tags(tags_data):
     res=[]
@@ -270,6 +273,7 @@ def add_article_views_db(aid):
     cursor.close()
     return 200
 
+# 获取文章详情
 '''
 // 根据aid 获取文章信息
 export function getArticleDetails(aid) {
@@ -322,6 +326,7 @@ def get_article_details_db(aid):
     cursor.close()
     return article, 200
 
+# 修改文章
 '''
 // 提交修改的数据
 const put = () => {
@@ -356,6 +361,7 @@ def modify_article_db(title, content, aid, description,tagIds,typeId):
     cursor.close()
     return jsonify({'message': 'Article modified successfully'}), 200
 
+# 删除文章
 '''
 // 删除文章
 const deleteArticle = () => {
@@ -382,6 +388,7 @@ def delete_article_db(aid):
     cursor.close()
     return jsonify({'message': 'Article deleted successfully'}), 200
 
+# 添加评论
 '''
 // 添加回复信息
 const sendMsg = (parentComId) => {
@@ -430,6 +437,7 @@ def add_comment_db(aid, parentComId, uid,parentCount,content='', sub_content='',
     cursor.close()
     return jsonify({'message': 'Sub-Comment added successfully'}), 200
 
+# 获取评论列表
 '''
 // 获取已过审文章评论信息
 export function getPublicContentment(aid) {
@@ -536,6 +544,7 @@ def get_public_comment_db(aid):
     print("评论列表：",comment_list)
     return comment_list, 200
 
+# 获取分类列表
 '''
   // 获取全部分类信息
   getTypes().then(res => {
@@ -594,6 +603,7 @@ def get_all_types_db():
     cursor.close()
     return type_list, 200
 
+# 获取首页文章列表
 '''
 // 热评
 export function getIndexTime(){
@@ -707,12 +717,13 @@ def handle_like_records_db(uid,aid):
     
     # like_records = 1
     # print("点赞记录：",like_records)
+    print("点赞记录：",result)
     like_records = json.loads(result[0])
     print("点赞记录：",like_records)
     if result[0] is not None:
         
-        # 查询用户是否有点赞过
-        # list_result = list(result)
+    # 查询用户是否有点赞过
+    # list_result = list(result)
         for i in like_records:
             # print("i=",i)
             if i == aid:
@@ -737,6 +748,7 @@ def handle_like_records_db(uid,aid):
     cursor.close()
     return 200
 
+# 处理用户点赞
 '''
 const handleLikeClick = async (event, article) => {
   event.stopPropagation();
@@ -786,3 +798,186 @@ def handle_like_click_db(aid,like_count,uid):
         return like_count, 200
     
     return jsonify({'error': 'Article not found'}), 400
+
+# 获取热评
+'''
+// 获取数据
+getIndexHot().then(res => {
+    articleList.value = res.data.page.list;
+});
+
+// 热评
+export function getIndexHot(){
+    return httpInstance({
+        url:'/api/index/hot',
+        method:'get',
+    })
+}
+'''
+def get_index_hot_db():
+    connection = create_connection()
+    cursor = connection.cursor()
+    
+    # 根据文章点赞数获取前三个
+    cursor.execute("select like_count,title,aid from articles order by like_count desc limit 3")
+    result = cursor.fetchall()
+    if not result:
+        cursor.close()
+        return jsonify({'error': 'No articles found'}), 400
+    article_list = []
+    for article in result:
+        article_dict = {
+            'title': article[1],
+            'aid': article[2],
+        }
+        article_list.append(article_dict)
+
+    cursor.close()
+    return article_list, 200
+
+# 搜索功能
+'''
+getSearch(queryData.value).then(res => {
+    console.log('搜索结果', res.data.pageInfo.list);
+    articleList.value = res.data.pageInfo.list;
+});
+
+// 与搜索有关的API
+export function getSearch(query){
+    return httpInstance({
+        url:`/api/query`,
+        method:'post',
+        data:query
+    })
+}
+'''
+def get_search_db(query):
+    connection = create_connection()
+    cursor = connection.cursor()
+
+    if query == '':
+        cursor.execute("""
+                   SELECT 
+                   a.aid, 
+                   u.user_name, 
+                   a.create_time, 
+                   a.description, 
+                   a.like_count, 
+                   a.page_view, 
+                   a.title, 
+                   t.tname,
+                   u.image,
+                   a.update_time,
+                   a.tagIds FROM 
+                   articles a 
+                   INNER JOIN 
+                   users u ON a.uid = u.id 
+                   INNER JOIN types t ON a.typeId = t.ttag_id 
+                   ORDER BY 
+                   a.create_time DESC
+        """)
+
+    else:
+        # 根据内容进行模糊查询
+        cursor.execute("""
+                   SELECT 
+                   a.aid, 
+                   u.user_name, 
+                   a.create_time, 
+                   a.description, 
+                   a.like_count, 
+                   a.page_view, 
+                   a.title, 
+                   t.tname,
+                   u.image,
+                   a.update_time,
+                   a.tagIds FROM 
+                   articles a 
+                   INNER JOIN 
+                   users u ON a.uid = u.id 
+                   INNER JOIN types t ON a.typeId = t.ttag_id 
+                   WHERE 
+                   a.description LIKE %s
+                   ORDER BY 
+                   a.create_time DESC 
+        """, ('%' + query + '%',))
+
+    result = cursor.fetchall()
+    if not result:
+        cursor.close()
+        return jsonify({'error': 'No articles found'}), 400
+    article_list = []
+    for article in result:
+        article_dict = {
+            'aid': article[0],
+            'author': article[1],
+            'createTime': article[2],
+            'description': article[3],
+            'likeCount': article[4],
+            'pageView': article[5],
+            'title': article[6],
+            'type': article[7],
+            'uavator': article[8],
+            'update_time': article[9]
+        }
+
+        tags_data = json.loads(article[10])
+
+        # 获取文章标签
+        article_dict['tags'] = get_tags(tags_data)
+
+        article_list.append(article_dict)
+
+    cursor.close()
+    return article_list, 200
+
+# 新增用户标签
+'''
+postNewTag(tag.value).then((res) => {
+    console.log(res);
+    msg.value = ''
+    msg.value = res.msg
+    loadTagsData();
+})
+
+export function postNewTag(tag) {
+    return httpInstance({
+        url: `/tag`,
+        method: 'post',
+        data: tag
+    })
+}
+'''
+def add_user_tag_db(tag,uid):
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO user_tags (utag_uid,utag_name) VALUES (%s,%s)", (uid,tag))
+    connection.commit()
+    cursor.close()
+    return "标签添加成功",200
+
+# 修改用户标签
+'''
+updateTagName(editedTag.value).then((res) => {
+
+    msg.value = ''
+    msg.value = res.msg
+    loadTagsData();
+})
+
+// 更新标签值
+export function updateTagName(tag) {
+    return httpInstance({
+        url: `/tag`,
+        method: 'put',
+        data: tag
+    })
+}
+'''
+def update_user_tag_db(tag,uid,old_tag):
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("UPDATE user_tags SET utag_name = %s WHERE utag_uid = %s AND utag_name = %s", (tag,uid,old_tag))
+    connection.commit()
+    cursor.close()
+    return "标签修改成功",200

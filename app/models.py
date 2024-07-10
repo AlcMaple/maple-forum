@@ -63,6 +63,14 @@ insert into types(tname) values('Linux'),('入门'),('python'),('vue'),('axios')
 
 ----
 如果报错1826，是因为你的外键名存在过了
+
+用户标签表
+create table user_tags(
+    utag_id int auto_increment primary key,
+    utag_uid int,
+    utag_name varchar(225) not null,
+    constraint fk_utag_uid foreign key(utag_uid) references users(id)
+)
 '''
 
 # 表名为user

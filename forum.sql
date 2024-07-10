@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.37, for Win64 (x86_64)
 --
 -- Host: localhost    Database: forum
 -- ------------------------------------------------------
--- Server version	8.0.36
+-- Server version	8.0.37
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -46,7 +46,7 @@ CREATE TABLE `articles` (
 
 LOCK TABLES `articles` WRITE;
 /*!40000 ALTER TABLE `articles` DISABLE KEYS */;
-INSERT INTO `articles` VALUES (1,'vue3入门教学','# 入门教程\n学好vue3是你找到工作的第一部基础','vue3是一个前端框架',1,3,1,'2024-06-26 09:18:44',NULL,'[1, 2, 3, 4]',4),(2,'test','test','test',2,4,0,'2024-07-06 11:33:47',NULL,'[1, 2]',1),(3,'qqqqqqqq','qwqweqwe','qqqqqqqq',2,12,1,'2024-07-06 11:35:56',NULL,'[6, 5, 7, 3]',5),(4,'测试点赞功能','测试点赞功能','测试',1,1,2,'2024-07-09 11:14:44',NULL,'[6, 7]',1);
+INSERT INTO `articles` VALUES (1,'vue3入门教学','# 入门教程\n学好vue3是你找到工作的第一部基础','vue3是一个前端框架',1,2,0,'2024-06-26 09:18:44',NULL,'[1, 2, 3, 4]',4),(2,'test','test','test',2,4,1,'2024-07-06 11:33:47',NULL,'[1, 2]',1),(3,'qqqqqqqq','qwqweqwe','qqqqqqqq',2,12,1,'2024-07-06 11:35:56',NULL,'[6, 5, 7, 3]',5),(4,'测试点赞功能','213','测试点赞共鞥你',2,2,3,'2024-07-09 23:20:31',NULL,'[3]',2);
 /*!40000 ALTER TABLE `articles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -137,7 +137,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'1234','2933724627@qq.com','scrypt:32768:8:1$rWe9MKTaUXzl9MIV$bd918457ffb7658700ebc4cb032e0f3b4648fe0a340be00c00a61cdea74205c4109ea3c8603832ce40a639bbf923e12be2cf3d62752b82f614f0c376b2eb2e20','13825600730','七点下班','Alc','src/assets/imgs/uid1.jpg','[0, 2, 3, 1, 4]'),(2,'2345','5844759584@qq.com','scrypt:32768:8:1$m6CiSFK9744qxPVb$1542a292884c98dfeb495cee1083714da6b93cec24886cdd8a8270f200e7fd3692efe4957df7d2d580f5405fdf95490577b052d4f313166054cd27f59a62d19c','18217599685','你还没有介绍自己呢！！！','user_17200956906721',NULL,NULL);
+INSERT INTO `users` VALUES (1,'1234','2933724627@qq.com','scrypt:32768:8:1$rWe9MKTaUXzl9MIV$bd918457ffb7658700ebc4cb032e0f3b4648fe0a340be00c00a61cdea74205c4109ea3c8603832ce40a639bbf923e12be2cf3d62752b82f614f0c376b2eb2e20','13825600730','七点下班','Alc','src/assets/imgs/uid1.jpg','[0]'),(2,'2345','5844759584@qq.com','scrypt:32768:8:1$m6CiSFK9744qxPVb$1542a292884c98dfeb495cee1083714da6b93cec24886cdd8a8270f200e7fd3692efe4957df7d2d580f5405fdf95490577b052d4f313166054cd27f59a62d19c','18217599685','你还没有介绍自己呢！！！','user_17200956906721',NULL,'[0, 4, 3, 2]');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -150,4 +150,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-07-09 23:11:57
+-- Dump completed on 2024-07-09 23:31:07
