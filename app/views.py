@@ -58,11 +58,11 @@ def send_verification_code():
     # verification_code = result[0]
     # session = result[1]
 
-    sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
-    # apiStatus = '200'
-    print(sendOK) # 是否成功(布尔值)
+    # sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
+    apiStatus = '200'
+    # print(sendOK) # 是否成功(布尔值)
     print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
-    print(info) # 描述信息 
+    # print(info) # 描述信息 
     if apiStatus == '200':
         print('短信发送成功')
         return jsonify({'msg': 'Verification code sent successfully'}), 200
@@ -253,6 +253,8 @@ def get_article_list():
     print(result_sponse,result_code)
 
     return jsonify({'code':200,'msg':'Article list found successfully','articleList':result_sponse})
+
+    # return jsonify({'code':400,'msg':'Article list found error'})
 
 '''
 // 根据aid 获取文章信息
@@ -548,7 +550,7 @@ def get_index_time():
     if result_code != 200:
         return jsonify({'code':400,'msg':'Article not found'})
     
-    print((str(result_sponse)))
+    # print((str(result_sponse)))
     return jsonify({'code':200,'msg':'Article found successfully','data':result_sponse})
 
 '''
@@ -704,12 +706,73 @@ def update_user_tag():
     tag = data.get('name')
     tagId = data.get('tagId')
     old_tag = data.get('oldName')
-    print("修改标签：",tag)
-    print("old_tag：" ,old_tag)
-    # result_sponse,result_code = update_user_tag_db(tag,tagId,old_tag)
-    # if result_code != 200:
-    #     return jsonify({'code':400,'msg':'Tag not updated'})
+    # print("修改标签：",tag)
+    print("tagId：" ,tagId)
+    # print("old_tag：" ,old_tag)
+    result_sponse,result_code = update_user_tag_db(tag,tagId,old_tag)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Tag not updated'})
 
-    # return jsonify({'code':200,'msg':'Tag updated successfully','msg':result_sponse})
+    return jsonify({'code':200,'msg':'Tag updated successfully','msg':result_sponse})
 
-    return jsonify({'code':200,'msg':'Tag updated successfully'})
+    # return jsonify({'code':200,'msg':'Tag updated successfully'})
+
+# 获取用户标签
+'''
+//获取用户标签信息
+export function getUserTagList(uid) {
+    return httpInstance({
+        url: `/tag/tagList`,
+        method: 'post',
+        data: {
+            uid: uid
+        }
+    })
+}
+
+// 加载参数
+loadTagsData = async () => {
+  const res = await getUserTagList(props.userId);
+  tagsData.value = res.data.pageInfo.list;
+};
+loadTagsData();
+'''
+@bp.route('/tag/tagList',methods=['post'])
+def get_user_tag_list():
+    data = json_response(request)
+    uid = data.get('uid')
+    print("获取用户标签：",uid)
+    result_sponse,result_code = get_user_tag_list_db(uid)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Tag not found'})
+
+    return jsonify({'code':200,'msg':'Tag found successfully','data':result_sponse})
+
+# 删除用户标签
+'''
+// 删除标签
+const handleDelete = (tagId) => {
+  deleteTag(tagId).then((res) => {
+    msg.value = ''
+    msg.value = res.msg
+    loadTagsData();
+  })
+  alert("模拟删除");
+};
+
+// 删除一个标签
+export function deleteTag(tagId) {
+    return httpInstance({
+        url: `/tag/${tagId}`,
+        method: 'delete',
+    })
+}
+'''
+@bp.route('/tag/<int:tagId>',methods=['delete'])
+def delete_user_tag(tagId):
+    print("删除标签：",tagId)
+    result_sponse,result_code = delete_user_tag_db(tagId)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Tag not deleted'})
+
+    return jsonify({'code':200,'msg':'Tag deleted successfully','msg':result_sponse})

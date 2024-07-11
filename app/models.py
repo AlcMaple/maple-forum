@@ -15,7 +15,7 @@ CREATE TABLE users (
     description TEXT,
     user_name varchar(225),
     image varchar(225),
-    like_article_ids json,
+    like_article_ids json
 );
 '''
 
@@ -59,7 +59,7 @@ create table types(
 )
 
 插入分类数据
-insert into types(tname) values('Linux'),('入门'),('python'),('vue'),('axios'),('java'),('pinia'),('python');
+insert into types(tname) values('Linux'),('入门'),('python'),('vue'),('Web前端开发'),('后端开发'),('其他');
 
 ----
 如果报错1826，是因为你的外键名存在过了

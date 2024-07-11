@@ -8,8 +8,8 @@ def create_connection():
     try:
         connect=pymysql.Connect(
             host='localhost',
-            port=7777,
-            # port=3306,
+            # port=7777,
+            port=3306,
             user='root',
             passwd='loveat2024a+.',
             db='forum',
@@ -70,10 +70,8 @@ def register_user(username,email, password, phone,user_name):
                    user_name,
                    image,
                    like_article_ids
-                   ) VALUES (%s,%s, %s,%s,%s,%s,%s,%s)", 
-                   (
-                   username, email, password_hash,phone,"你还没有介绍自己呢！！！",user_name,"src/assets/imgs/uid1.jpg",json.dumps([0]))
-                   """)
+                   ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""", 
+                   (username, email, password_hash,phone,"你还没有介绍自己呢！！！",user_name,"src/assets/imgs/uid1.jpg",json.dumps([0])))
 
     print('插入数据库完成，开始事务')
 
@@ -235,18 +233,55 @@ onMounted: {
 def get_article_list_db(uid):
     connection = create_connection()
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM articles WHERE uid = %s", (uid,))
+    # cursor.execute("SELECT * FROM articles WHERE uid = %s", (uid,))
+    cursor.execute("""
+                   SELECT 
+                   a.aid, 
+                   u.user_name, 
+                   a.create_time, 
+                   a.description, 
+                   a.like_count, 
+                   a.page_view, 
+                   a.title, 
+                   t.tname,
+                   u.image,
+                   a.update_time,
+                   u.id,
+                   a.tagIds FROM 
+                   articles a 
+                   INNER JOIN 
+                   users u ON a.uid = u.id 
+                   INNER JOIN types t ON a.typeId = t.ttag_id 
+                   where a.uid = %s 
+                   ORDER BY 
+                   a.create_time DESC
+        """, (uid,))
     result = cursor.fetchall()
     if not result:
         cursor.close()
         return jsonify({'error': 'No articles found'}), 400
     article_list = []
     for article in result:
-        article_list.append({
-            'title': article[1],
-            'aid':article[0],
-            'uid':article[4],
-        })
+        article_dict = {
+            'aid': article[0],
+            'author': article[1],
+            'createTime': article[2],
+            'description': article[3],
+            'likeCount': article[4],
+            'pageView': article[5],
+            'title': article[6],
+            'type': article[7],
+            'uavator': article[8],
+            'updateTime': article[9],
+            'uid': article[10],
+        }
+
+        tags_data = json.loads(article[11])
+
+        # 获取文章标签
+        article_dict['tags'] = get_tags(tags_data)
+
+        article_list.append(article_dict)
     cursor.close()
     return article_list, 200
   
@@ -309,7 +344,7 @@ def get_article_details_db(aid):
         'description': result[3],
         'commentabled': 'true',
         'tags':[],
-        'typeId':result[10],
+        'typeId':'',
     }
 
     code = add_article_views_db(aid)
@@ -353,10 +388,13 @@ export function modifyArticle(article) {
 '''
 def modify_article_db(title, content, aid, description,tagIds,typeId):
     from .utils import array_to_json
+    from datetime import datetime
     connection = create_connection()
     cursor = connection.cursor()
     tagIds = array_to_json(tagIds)
-    cursor.execute("UPDATE articles SET title=%s, content=%s, description=%s, tagIds=%s, typeId=%s WHERE aid=%s", (title, content, description, aid,tagIds,typeId))
+    # 设置更新时间
+    update_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cursor.execute("UPDATE articles SET title=%s, content=%s, description=%s, tagIds=%s, typeId=%s,update_time=%s WHERE aid=%s", (title, content, description,tagIds,typeId,update_time,aid))
     connection.commit()
     cursor.close()
     return jsonify({'message': 'Article modified successfully'}), 200
@@ -694,7 +732,7 @@ def get_index_time_db():
             'title': article[6],
             'type': article[7],
             'uavator': article[8],
-            'update_time': article[9]
+            'updateTime': article[9]
         }
 
         tags_data = json.loads(article[10])
@@ -918,7 +956,7 @@ def get_search_db(query):
             'title': article[6],
             'type': article[7],
             'uavator': article[8],
-            'update_time': article[9]
+            'updateTime': article[9]
         }
 
         tags_data = json.loads(article[10])
@@ -974,10 +1012,78 @@ export function updateTagName(tag) {
     })
 }
 '''
-def update_user_tag_db(tag,uid,old_tag):
+def update_user_tag_db(tag,tagId,old_tag):
     connection = create_connection()
     cursor = connection.cursor()
-    cursor.execute("UPDATE user_tags SET utag_name = %s WHERE utag_uid = %s AND utag_name = %s", (tag,uid,old_tag))
+    cursor.execute("UPDATE user_tags SET utag_name = %s WHERE utag_id = %s AND utag_name = %s", (tag,tagId,old_tag))
     connection.commit()
     cursor.close()
     return "标签修改成功",200
+
+# 获取用户标签
+'''
+//获取用户标签信息
+export function getUserTagList(uid) {
+    return httpInstance({
+        url: `/tag/tagList`,
+        method: 'post',
+        data: {
+            uid: uid
+        }
+    })
+}
+
+// 加载参数
+loadTagsData = async () => {
+  const res = await getUserTagList(props.userId);
+  tagsData.value = res.data.pageInfo.list;
+};
+loadTagsData();
+'''
+def get_user_tag_list_db(uid):
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT utag_name,utag_id FROM user_tags WHERE utag_uid = %s", (uid,))
+    result = cursor.fetchall()
+    if not result:
+        cursor.close()
+        return jsonify({'error': 'No tags found'}), 400
+    tag_list = []
+    for tag in result:
+        tag_dict = {
+            'name': tag[0],
+            'tagId': tag[1]
+        }
+        tag_list.append(tag_dict)
+
+    cursor.close()
+    return tag_list, 200
+
+# 删除用户标签
+'''
+// 删除标签
+const handleDelete = (tagId) => {
+  deleteTag(tagId).then((res) => {
+    msg.value = ''
+    msg.value = res.msg
+    loadTagsData();
+  })
+  alert("模拟删除");
+};
+
+// 删除一个标签
+export function deleteTag(tagId) {
+    return httpInstance({
+        url: `/tag/${tagId}`,
+        method: 'delete',
+    })
+}
+'''
+def delete_user_tag_db(tagId):
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM user_tags WHERE utag_id = %s", (tagId,))
+    connection.commit()
+    cursor.close()
+    return "标签删除成功",200
+
