@@ -58,11 +58,11 @@ def send_verification_code():
     # verification_code = result[0]
     # session = result[1]
 
-    # sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
-    apiStatus = '200'
-    # print(sendOK) # 是否成功(布尔值)
+    sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
+    # apiStatus = '200'
+    print(sendOK) # 是否成功(布尔值)
     print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
-    # print(info) # 描述信息 
+    print(info) # 描述信息 
     if apiStatus == '200':
         print('短信发送成功')
         return jsonify({'msg': 'Verification code sent successfully'}), 200
@@ -115,24 +115,25 @@ def user():
     # print('avator：',image_data)
     # 解码base64字符串为二进制数据
     decoded_data = base64.b64decode(image_data)
+    # print('decoded_data：',decoded_data)
 
-    download_image(decoded_data,uid)
+    # download_image(decoded_data,uid)
 
-    is_success = check_image_exist(uid)
-    if is_success == False:
-        return jsonify({'code':400,'msg':'Avatar upload failed'})
+    # is_success = check_image_exist(uid)
+    # if is_success == False:
+    #     return jsonify({'code':400,'msg':'Avatar upload failed'})
 
-    # 获取头像路径
-    avator_path = get_avatar_path(uid)
-    print('avator_path:',avator_path)
+    # # 获取头像路径
+    # avator_path = get_avatar_path(uid)
+    # print('avator_path:',avator_path)
 
-    result_sponse,result_code = update_user(uid,nickname,email,description,avator_path)
-    if result_code == 200:
-        return jsonify({'code':0,'msg':'User updated successfully'})
-    else:
-        return jsonify({'code':400,'msg':'User update failed'})
+    # result_sponse,result_code = update_user(uid,nickname,email,description,avator_path)
+    # if result_code == 200:
+    #     return jsonify({'code':0,'msg':'User updated successfully'})
+    # else:
+    #     return jsonify({'code':400,'msg':'User update failed'})
     
-    # return jsonify({'code':0,'msg':'User updated successfully'})
+    return jsonify({'code':0,'msg':'User updated successfully'})
 
 # 获取用户信息
 @bp.route('/user',methods=['post'])

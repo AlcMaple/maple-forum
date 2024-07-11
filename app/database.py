@@ -3,16 +3,20 @@ from flask import jsonify
 from werkzeug.security import generate_password_hash,check_password_hash
 import json
 
+# 导入初始头像数据
+import base64
+from .imageData import imageData
+
 # 创建数据库连接
 def create_connection():
     try:
         connect=pymysql.Connect(
             host='localhost',
-            # port=7777,
-            port=3306,
-            user='root',
-            passwd='loveat2024a+.',
-            db='forum',
+            port=7777,
+            # port=3306,
+            user='your_username',
+            passwd='your_password',
+            db='your_database_name',
             charset='utf8'
         )
         cursor=connect.cursor()
@@ -71,7 +75,7 @@ def register_user(username,email, password, phone,user_name):
                    image,
                    like_article_ids
                    ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""", 
-                   (username, email, password_hash,phone,"你还没有介绍自己呢！！！",user_name,"src/assets/imgs/uid1.jpg",json.dumps([0])))
+                   (username, email, password_hash,phone,"你还没有介绍自己呢！！！",user_name,imageData,json.dumps([0])))
 
     print('插入数据库完成，开始事务')
 
@@ -141,6 +145,9 @@ def get_user_info(user_id):
     
     # print('avator：',result[7])
 
+    # 对头像进行解码
+    avator_data = base64.b64encode(result[7]).decode('utf-8')
+
     user = {
         'id': result[0],
         'username': result[1],
@@ -148,7 +155,7 @@ def get_user_info(user_id):
         'phone': result[4],
         'description': result[5],
         'user_name':result[6],
-        'avator':result[7]
+        'avator':avator_data
     }
 
     print('user:',user)
@@ -260,8 +267,12 @@ def get_article_list_db(uid):
     if not result:
         cursor.close()
         return jsonify({'error': 'No articles found'}), 400
+    
     article_list = []
     for article in result:
+    # 对头像进行解码
+        avator_data = base64.b64encode(article[8]).decode('utf-8')
+
         article_dict = {
             'aid': article[0],
             'author': article[1],
@@ -271,7 +282,7 @@ def get_article_list_db(uid):
             'pageView': article[5],
             'title': article[6],
             'type': article[7],
-            'uavator': article[8],
+            'uavator': avator_data,
             'updateTime': article[9],
             'uid': article[10],
         }
@@ -561,21 +572,27 @@ def get_public_comment_db(aid):
         cursor.execute("SELECT c.uid, c.sub_content, u.user_name, u.image, c.pnickname, c.time FROM comments c INNER JOIN users u ON c.uid = u.id WHERE c.parentComId = %s and c.pnickname is not NULL", (comment[0],))
         sub_reply_result = cursor.fetchall()
         for sub_reply in sub_reply_result:
+            # 处理头像
+            avator_data = base64.b64encode(sub_reply[3]).decode('utf-8')
+
             sub_reply_list.append({
                 'uid': sub_reply[0],
                 'content': sub_reply[1],
                 'createTime': sub_reply[5],
                 'nickname': sub_reply[2],
-                'uavator': "../" + sub_reply[3],
+                'uavator': avator_data,
                 'pnickname': sub_reply[4],
             })
+
+        # 处理头像
+        avator_data = base64.b64encode(comment[5]).decode('utf-8')
         comment_list.append({
             'comId': comment[0],
             'uid': comment[1],
             'content': comment[2],
             'createTime': comment[3],
             'nickname': comment[4],
-            'uavator': "../" + comment[5],
+            'uavator': avator_data,
            'subReply': sub_reply_list,
         })
     cursor.close()
@@ -722,6 +739,8 @@ def get_index_time_db():
         return jsonify({'error': 'No articles found'}), 400
     article_list = []
     for article in result:
+        avator_data = base64.b64encode(article[8]).decode('utf-8')
+
         article_dict = {
             'aid': article[0],
             'author': article[1],
@@ -731,7 +750,7 @@ def get_index_time_db():
             'pageView': article[5],
             'title': article[6],
             'type': article[7],
-            'uavator': article[8],
+            'uavator': avator_data,
             'updateTime': article[9]
         }
 
@@ -946,6 +965,7 @@ def get_search_db(query):
         return jsonify({'error': 'No articles found'}), 400
     article_list = []
     for article in result:
+        avator_data = base64.b64encode(article[8]).decode('utf-8')
         article_dict = {
             'aid': article[0],
             'author': article[1],
@@ -955,7 +975,7 @@ def get_search_db(query):
             'pageView': article[5],
             'title': article[6],
             'type': article[7],
-            'uavator': article[8],
+            'uavator': avator_data,
             'updateTime': article[9]
         }
 
