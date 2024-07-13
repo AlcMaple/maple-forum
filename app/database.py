@@ -12,8 +12,7 @@ def create_connection():
     try:
         connect=pymysql.Connect(
             host='localhost',
-            port=7777,
-            # port=3306,
+            port=3306,
             user='your_username',
             passwd='your_password',
             db='your_database_name',
@@ -158,7 +157,7 @@ def get_user_info(user_id):
         'avator':avator_data
     }
 
-    print('user:',user)
+    # print('user:',user)
     cursor.close()
     return user, 200
 
@@ -343,7 +342,7 @@ def get_article_details_db(aid):
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM articles WHERE aid = %s", (aid,))
     result = cursor.fetchone()
-    print("result:",result)
+    # print("result:",result)
     if not result:
         # print("检查是否有执行这个地方")
         cursor.close()
@@ -471,7 +470,7 @@ export function postSendMag(send) {
 def add_comment_db(aid, parentComId, uid,parentCount,content='', sub_content='',pnickname=''):
     connection = create_connection()
     cursor = connection.cursor()
-    print('将要添加的数据库中的content的值：',content)
+    # print('将要添加的数据库中的content的值：',content)
     print(bool(content))
     if sub_content == '':
         print('添加一级评论')
@@ -596,7 +595,7 @@ def get_public_comment_db(aid):
            'subReply': sub_reply_list,
         })
     cursor.close()
-    print("评论列表：",comment_list)
+    # print("评论列表：",comment_list)
     return comment_list, 200
 
 # 获取分类列表
@@ -774,9 +773,9 @@ def handle_like_records_db(uid,aid):
     
     # like_records = 1
     # print("点赞记录：",like_records)
-    print("点赞记录：",result)
+    # print("点赞记录：",result)
     like_records = json.loads(result[0])
-    print("点赞记录：",like_records)
+    # print("点赞记录：",like_records)
     if result[0] is not None:
         
     # 查询用户是否有点赞过
@@ -798,7 +797,7 @@ def handle_like_records_db(uid,aid):
     like_records.append(aid)
     # print("转换为列表后的结果：",list_result)
     # 转换为json格式的数据后的结果
-    print("更新后的点赞记录：",json.dumps(like_records))
+    # print("更新后的点赞记录：",json.dumps(like_records))
     # 更新json格式的数据
     cursor.execute("UPDATE users SET like_article_ids = %s WHERE id = %s", (json.dumps(like_records),uid))
     connection.commit()
@@ -842,7 +841,7 @@ def handle_like_click_db(aid,like_count,uid):
     
     # 处理用户的点赞记录
     result = handle_like_records_db(uid,aid)
-    print("点赞记录处理结果：",type(result))
+    # print("点赞记录处理结果：",type(result))
     if result == 200:
         connection = create_connection()
         cursor = connection.cursor()

@@ -29,7 +29,7 @@ def register():
     code = int(data.get('verification_code'))
 
     verification_response = verify_code(phone,code,session)
-    print("verification_response:",verification_response)
+    # print("verification_response:",verification_response)
     # 获取返回的状态码和信息
     status_code = verification_response['code']
     # print(status_code)
@@ -61,8 +61,8 @@ def send_verification_code():
     sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
     # apiStatus = '200'
     print(sendOK) # 是否成功(布尔值)
-    print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
-    print(info) # 描述信息 
+    # print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
+    # print(info) # 描述信息 
     if apiStatus == '200':
         print('短信发送成功')
         return jsonify({'msg': 'Verification code sent successfully'}), 200
@@ -74,14 +74,14 @@ def send_verification_code():
 @bp.route('/login',methods=['POST'])
 def login():
     data = json_response(request)
-    print("data：",data)
+    # print("data：",data)
 
     account = data.get('account')
     password = data.get('password')
 
     result_sponse,result_code = login_user(account,password)
-    print("result_spnonse：",result_sponse)
-    print("result_code",result_code)
+    # print("result_spnonse：",result_sponse)
+    # print("result_code",result_code)
 
     if result_code == 200:
         # 生成token值
@@ -104,7 +104,7 @@ def login():
 def user():
     # data = json_response(request)
     data = json_response(request)
-    print("update_data：",data)
+    # print("update_data：",data)
 
     uid = data.get('uid')
     email=data.get('email')
@@ -139,8 +139,8 @@ def user():
 @bp.route('/user',methods=['post'])
 def get_user():
     data = json_response(request)
-    print("DATA:",data)
-    print("data['_rawValue'][0]['uid']：",data['_rawValue'][0]['uid'])
+    # print("DATA:",data)
+    # print("data['_rawValue'][0]['uid']：",data['_rawValue'][0]['uid'])
 
     result_sponse,result_code = get_user_info(data['_rawValue'][0]['uid'])
     if result_code == 200:
@@ -162,21 +162,21 @@ def get_user():
 @bp.route('/user/password',methods=['post'])
 def change_password():
     data = json_response(request)
-    print(data)
+    # print(data)
 
     oldPassword=data.get('oldPassword')
     newPassword=data.get('newPassword')
-    print('oldPassword=',oldPassword)
-    print('newPassword=',newPassword)
+    # print('oldPassword=',oldPassword)
+    # print('newPassword=',newPassword)
     uid = str_to_dict(data.get('uid'))['userInfo']['uid']
-    print('uid=',uid)
+    # print('uid=',uid)
 
     # 获取用户原密码
     result_sponse,result_code = get_user_password(uid)
     # print(result_sponse)
 
     result = decrypt_password(result_sponse,oldPassword)
-    print('result=',result)
+    # print('result=',result)
 
     if oldPassword == newPassword or decrypt_password(result_sponse,oldPassword) == False:
         return jsonify({'code':400,'msg':'New password cannot be the same as the old password'})
@@ -218,7 +218,7 @@ def add_article():
     uid = data.get('uid')
     tagIds = data.get('tagIds')
     typeId = data.get('typeId')
-    print("uid：",uid)
+    # print("uid：",uid)
     add_article_result,add_article_code = add_article_db(title,content,description,uid,tagIds,typeId)
     if add_article_code == 200:
         return jsonify({'code':200,'msg':'Article added successfully'})
@@ -248,10 +248,10 @@ onMounted: {
 @bp.route('/article',methods=['post'])
 def get_article_list():
     data = json_response(request)
-    print("get_article_list：",data)
+    # print("get_article_list：",data)
     uid = data.get('uid')
     result_sponse,result_code = get_article_list_db(uid)
-    print(result_sponse,result_code)
+    # print(result_sponse,result_code)
 
     return jsonify({'code':200,'msg':'Article list found successfully','articleList':result_sponse})
 
@@ -394,7 +394,7 @@ def add_comment():
     sub_content = data.get("sub_content")
     pnickname = data.get('pnickname')
 
-    print('目前aid:',aid)
+    # print('目前aid:',aid)
 
     if pnickname == "":
         result_sponse,result_code = add_comment_db(aid,parentCount,uid,parentCount,content=content)
@@ -481,7 +481,7 @@ def get_public_comment(aid):
     result_sponse,result_code = get_public_comment_db(aid)
     if result_code != 200:
         return jsonify({'code':400,'msg':'Comment not found'})
-    print("查询评论信息result_sponse：",result_sponse)
+    # print("查询评论信息result_sponse：",result_sponse)
     return jsonify({'code':200,'msg':'Comment found successfully','data':result_sponse})
 
 '''
@@ -581,9 +581,9 @@ def handle_like_click(aid):
     uid = data.get('uid')
     # print("当前文章的aid：",aid)
     # print("当前文章的likeCount：",likeCount)
-    print("当前用户的uid：",uid)
+    # print("当前用户的uid：",uid)
     response_result,response_code = handle_like_click_db(aid,likeCount,uid)
-    print("点赞响应结果：",response_result)
+    # print("点赞响应结果：",response_result)
     if response_code != 200:
         return jsonify({'code':400,'msg':'Article not found'})
     
@@ -632,7 +632,7 @@ export function getSearch(query){
 def get_search():
     data = json_response(request)
     query = data.get('query')
-    print("搜索关键字：",query)
+    # print("搜索关键字：",query)
     result_sponse,result_code = get_search_db(query)
     if result_code != 200:
         return jsonify({'code':400,'msg':'Search not found'})
@@ -676,7 +676,7 @@ def add_user_tag():
     data = json_response(request)
     tag = data.get('name')
     uid = data.get('uid')
-    print("新增标签：",tag)
+    # print("新增标签：",tag)
     result_sponse,result_code = add_user_tag_db(tag,uid)
     if result_code != 200:
         return jsonify({'code':400,'msg':'Tag not added'})
@@ -708,7 +708,7 @@ def update_user_tag():
     tagId = data.get('tagId')
     old_tag = data.get('oldName')
     # print("修改标签：",tag)
-    print("tagId：" ,tagId)
+    # print("tagId：" ,tagId)
     # print("old_tag：" ,old_tag)
     result_sponse,result_code = update_user_tag_db(tag,tagId,old_tag)
     if result_code != 200:
@@ -742,7 +742,7 @@ loadTagsData();
 def get_user_tag_list():
     data = json_response(request)
     uid = data.get('uid')
-    print("获取用户标签：",uid)
+    # print("获取用户标签：",uid)
     result_sponse,result_code = get_user_tag_list_db(uid)
     if result_code != 200:
         return jsonify({'code':400,'msg':'Tag not found'})
@@ -771,7 +771,7 @@ export function deleteTag(tagId) {
 '''
 @bp.route('/tag/<int:tagId>',methods=['delete'])
 def delete_user_tag(tagId):
-    print("删除标签：",tagId)
+    # print("删除标签：",tagId)
     result_sponse,result_code = delete_user_tag_db(tagId)
     if result_code != 200:
         return jsonify({'code':400,'msg':'Tag not deleted'})
