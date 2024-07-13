@@ -20,9 +20,10 @@ def str_to_dict(data):
 # 定义四位数的随机验证码
 def generate_verification_code():
     verification_code = str(random.randint(1000, 9999))
-    # verification_code=7420
+    # verification_code='7420'
     return verification_code
 
+# 发送短信验证码
 def send_sms(phone_number,session):
 
     # 生成验证码
@@ -57,8 +58,8 @@ def verify_code(phone,code,session):
     
     print('--------------------------------------')
     # print(current_timestamp - code_timestamp < 60)
-    print(type (user_code))
-    print(type (session['verification_code']))
+    print("user_code：",type (user_code))
+    print("session.get('verification_code')：",type (session['verification_code']))
     # print(user_code == session['verification_code'])
 
     # 检查验证码是否有效（1分钟时效性）
@@ -100,6 +101,7 @@ def get_current_path():
 def download_image(image_data,uid):
     current_dir = get_current_path()
     imgs_dir = os.path.join(current_dir, '../../vue3-forum/src/assets/imgs')
+    # imgs_dir = os.path.join(current_dir, '../../maple-FFe/src/assets/imgs')
 
     os.makedirs(imgs_dir, exist_ok=True)
 
@@ -110,6 +112,7 @@ def download_image(image_data,uid):
 def check_image_exist(uid):
     current_dir = get_current_path()
     imgs_dir = os.path.join(current_dir, '../../vue3-forum/src/assets/imgs')
+    # imgs_dir = os.path.join(current_dir, '../../maple-FFe/src/assets/imgs')
 
     img_path = os.path.join(imgs_dir, "uid{}.jpg".format(uid))
 

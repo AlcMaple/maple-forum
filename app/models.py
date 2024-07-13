@@ -14,7 +14,8 @@ CREATE TABLE users (
     phone VARCHAR(20) UNIQUE,
     description TEXT,
     user_name varchar(225),
-    image varchar(225)
+    image LONGBLOB,
+    like_article_ids json
 );
 '''
 
@@ -58,10 +59,18 @@ create table types(
 )
 
 插入分类数据
-insert into types(tname) values('Linux'),('入门'),('python'),('vue'),('axios'),('java'),('pinia'),('python');
+insert into types(tname) values('Linux'),('入门'),('python'),('vue'),('Web前端开发'),('后端开发'),('其他');
 
 ----
 如果报错1826，是因为你的外键名存在过了
+
+用户标签表
+create table user_tags(
+    utag_id int auto_increment primary key,
+    utag_uid int,
+    utag_name varchar(225) not null,
+    constraint fk_utag_uid foreign key(utag_uid) references users(id)
+)
 '''
 
 # 表名为user

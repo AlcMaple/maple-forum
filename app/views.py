@@ -17,6 +17,7 @@ session = {
     'code_phone': ''
 }
 
+# 注册
 @bp.route('/register',methods=['POST'])
 def register():
     data = json_response(request)
@@ -28,7 +29,7 @@ def register():
     code = int(data.get('verification_code'))
 
     verification_response = verify_code(phone,code,session)
-    print("verification_response:",verification_response)
+    # print("verification_response:",verification_response)
     # 获取返回的状态码和信息
     status_code = verification_response['code']
     # print(status_code)
@@ -45,6 +46,7 @@ def register():
     else:
         return jsonify({'code':400,'msg':message})
 
+# 发送验证码
 @bp.route('/send_verification_code',methods=['POST'])
 def send_verification_code():
     data = json_response(request)
@@ -59,8 +61,8 @@ def send_verification_code():
     sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
     # apiStatus = '200'
     print(sendOK) # 是否成功(布尔值)
-    print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
-    print(info) # 描述信息 
+    # print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
+    # print(info) # 描述信息 
     if apiStatus == '200':
         print('短信发送成功')
         return jsonify({'msg': 'Verification code sent successfully'}), 200
@@ -68,17 +70,18 @@ def send_verification_code():
         print('短信发送失败')
         return jsonify({'error': 'Verification code sent failed'}), 400
     
+# 登录
 @bp.route('/login',methods=['POST'])
 def login():
     data = json_response(request)
-    print("data：",data)
+    # print("data：",data)
 
     account = data.get('account')
     password = data.get('password')
 
     result_sponse,result_code = login_user(account,password)
-    print("result_spnonse：",result_sponse)
-    print("result_code",result_code)
+    # print("result_spnonse：",result_sponse)
+    # print("result_code",result_code)
 
     if result_code == 200:
         # 生成token值
@@ -96,11 +99,12 @@ def login():
     
     return jsonify({'code':400,'msg':'账号或密码不正确'})
 
+# 修改用户信息
 @bp.route('/user',methods=['put'])
 def user():
     # data = json_response(request)
     data = json_response(request)
-    print("update_data：",data)
+    # print("update_data：",data)
 
     uid = data.get('uid')
     email=data.get('email')
@@ -111,31 +115,32 @@ def user():
     # print('avator：',image_data)
     # 解码base64字符串为二进制数据
     decoded_data = base64.b64decode(image_data)
+    # print('decoded_data：',decoded_data)
 
-    download_image(decoded_data,uid)
+    # download_image(decoded_data,uid)
 
-    is_success = check_image_exist(uid)
-    if is_success == False:
-        return jsonify({'code':400,'msg':'Avatar upload failed'})
+    # is_success = check_image_exist(uid)
+    # if is_success == False:
+    #     return jsonify({'code':400,'msg':'Avatar upload failed'})
 
-    # 获取头像路径
-    avator_path = get_avatar_path(uid)
-    print('avator_path:',avator_path)
+    # # 获取头像路径
+    # avator_path = get_avatar_path(uid)
+    # print('avator_path:',avator_path)
 
-    result_sponse,result_code = update_user(uid,nickname,email,description,avator_path)
-    if result_code == 200:
-        return jsonify({'code':0,'msg':'User updated successfully'})
-    else:
-        return jsonify({'code':400,'msg':'User update failed'})
+    # result_sponse,result_code = update_user(uid,nickname,email,description,avator_path)
+    # if result_code == 200:
+    #     return jsonify({'code':0,'msg':'User updated successfully'})
+    # else:
+    #     return jsonify({'code':400,'msg':'User update failed'})
     
-    # return jsonify({'code':0,'msg':'User updated successfully'})
+    return jsonify({'code':0,'msg':'User updated successfully'})
 
 # 获取用户信息
 @bp.route('/user',methods=['post'])
 def get_user():
     data = json_response(request)
-    print("DATA:",data)
-    print("data['_rawValue'][0]['uid']：",data['_rawValue'][0]['uid'])
+    # print("DATA:",data)
+    # print("data['_rawValue'][0]['uid']：",data['_rawValue'][0]['uid'])
 
     result_sponse,result_code = get_user_info(data['_rawValue'][0]['uid'])
     if result_code == 200:
@@ -157,21 +162,21 @@ def get_user():
 @bp.route('/user/password',methods=['post'])
 def change_password():
     data = json_response(request)
-    print(data)
+    # print(data)
 
     oldPassword=data.get('oldPassword')
     newPassword=data.get('newPassword')
-    print('oldPassword=',oldPassword)
-    print('newPassword=',newPassword)
+    # print('oldPassword=',oldPassword)
+    # print('newPassword=',newPassword)
     uid = str_to_dict(data.get('uid'))['userInfo']['uid']
-    print('uid=',uid)
+    # print('uid=',uid)
 
     # 获取用户原密码
     result_sponse,result_code = get_user_password(uid)
     # print(result_sponse)
 
     result = decrypt_password(result_sponse,oldPassword)
-    print('result=',result)
+    # print('result=',result)
 
     if oldPassword == newPassword or decrypt_password(result_sponse,oldPassword) == False:
         return jsonify({'code':400,'msg':'New password cannot be the same as the old password'})
@@ -213,7 +218,7 @@ def add_article():
     uid = data.get('uid')
     tagIds = data.get('tagIds')
     typeId = data.get('typeId')
-    print("uid：",uid)
+    # print("uid：",uid)
     add_article_result,add_article_code = add_article_db(title,content,description,uid,tagIds,typeId)
     if add_article_code == 200:
         return jsonify({'code':200,'msg':'Article added successfully'})
@@ -243,12 +248,14 @@ onMounted: {
 @bp.route('/article',methods=['post'])
 def get_article_list():
     data = json_response(request)
-    print(data)
+    # print("get_article_list：",data)
     uid = data.get('uid')
     result_sponse,result_code = get_article_list_db(uid)
-    print(result_sponse,result_code)
+    # print(result_sponse,result_code)
 
     return jsonify({'code':200,'msg':'Article list found successfully','articleList':result_sponse})
+
+    # return jsonify({'code':400,'msg':'Article list found error'})
 
 '''
 // 根据aid 获取文章信息
@@ -387,7 +394,7 @@ def add_comment():
     sub_content = data.get("sub_content")
     pnickname = data.get('pnickname')
 
-    print('目前aid:',aid)
+    # print('目前aid:',aid)
 
     if pnickname == "":
         result_sponse,result_code = add_comment_db(aid,parentCount,uid,parentCount,content=content)
@@ -474,7 +481,7 @@ def get_public_comment(aid):
     result_sponse,result_code = get_public_comment_db(aid)
     if result_code != 200:
         return jsonify({'code':400,'msg':'Comment not found'})
-    print("查询评论信息result_sponse：",result_sponse)
+    # print("查询评论信息result_sponse：",result_sponse)
     return jsonify({'code':200,'msg':'Comment found successfully','data':result_sponse})
 
 '''
@@ -523,3 +530,250 @@ def get_all_types():
         return jsonify({'code':400,'msg':'Types not found'})
     
     return jsonify({'code':200,'msg':'Types found successfully','data':respnse_result})
+
+'''
+// 热评
+export function getIndexTime(){
+    return httpInstance({
+        url:'/api/index/time',
+        method:'get',
+    })
+}
+
+getIndexTime().then(res => {
+    articleList.value = res.data.page.list;
+    console.log('首页返回数据',articleList.value);
+  });
+'''
+@bp.route('/api/index/time',methods=['get'])
+def get_index_time():
+    result_sponse,result_code = get_index_time_db()
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Article not found'})
+    
+    # print((str(result_sponse)))
+    return jsonify({'code':200,'msg':'Article found successfully','data':result_sponse})
+
+'''
+export function handleThumb(aid, likeCount) {
+    return httpInstance({
+        url: `/article/${aid}/like`,
+        method: 'post',
+        data: {
+            likeCount: likeCount
+        }
+    });
+}
+
+const handleLikeClick = async (event, article) => {
+  event.stopPropagation();
+  article.likeCount++;
+
+  handleThumb(article.aid, article.likeCount).then((res) => {
+    console.log(res);
+  });
+};
+'''
+@bp.route('/article/<int:aid>/like',methods=['post'])
+def handle_like_click(aid):
+    data = json_response(request)
+    likeCount = data.get('likeCount')
+    uid = data.get('uid')
+    # print("当前文章的aid：",aid)
+    # print("当前文章的likeCount：",likeCount)
+    # print("当前用户的uid：",uid)
+    response_result,response_code = handle_like_click_db(aid,likeCount,uid)
+    # print("点赞响应结果：",response_result)
+    if response_code != 200:
+        return jsonify({'code':400,'msg':'Article not found'})
+    
+    return jsonify({'code':200,'msg':'Article found successfully','data':response_result})
+
+# 首页热评
+'''
+// 获取数据
+getIndexHot().then(res => {
+    articleList.value = res.data.page.list;
+});
+
+// 热评
+export function getIndexHot(){
+    return httpInstance({
+        url:'/api/index/hot',
+        method:'get',
+    })
+}
+'''
+@bp.route('/api/index/hot',methods=['get'])
+def get_index_hot():
+    result_sponse,result_code = get_index_hot_db()
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Article not found'})
+    
+    return jsonify({'code':200,'msg':'Article found successfully','data':result_sponse})
+
+# 搜索功能
+'''
+getSearch(queryData.value).then(res => {
+    console.log('搜索结果', res.data.pageInfo.list);
+    articleList.value = res.data.pageInfo.list;
+});
+
+// 与搜索有关的API
+export function getSearch(query){
+    return httpInstance({
+        url:`/api/query`,
+        method:'post',
+        data:query
+    })
+}
+'''
+@bp.route('/api/query',methods=['post'])
+def get_search():
+    data = json_response(request)
+    query = data.get('query')
+    # print("搜索关键字：",query)
+    result_sponse,result_code = get_search_db(query)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Search not found'})
+
+    return jsonify({'code':200,'msg':'Search found successfully','data':result_sponse})
+
+# 获取用户标签
+'''
+getUserTagList(userData.value[0].uid).then(res => {
+    console.log('用户主页',res);
+    tags.value=res.data.pageInfo.list
+});
+
+export function getUserTagList() {
+    return httpInstance({
+        url: `/tag/tagList`,
+        method: 'get',
+    })
+}
+'''
+
+# 新增用户标签
+'''
+postNewTag(tag.value).then((res) => {
+    console.log(res);
+    msg.value = ''
+    msg.value = res.msg
+    loadTagsData();
+})
+
+export function postNewTag(tag) {
+    return httpInstance({
+        url: `/tag`,
+        method: 'post',
+        data: tag
+    })
+}
+'''
+@bp.route('/tag',methods=['post'])
+def add_user_tag():
+    data = json_response(request)
+    tag = data.get('name')
+    uid = data.get('uid')
+    # print("新增标签：",tag)
+    result_sponse,result_code = add_user_tag_db(tag,uid)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Tag not added'})
+
+    return jsonify({'code':200,'msg':'Tag added successfully','msg':result_sponse})
+
+# 修改用户标签
+'''
+updateTagName(editedTag.value).then((res) => {
+
+    msg.value = ''
+    msg.value = res.msg
+    loadTagsData();
+})
+
+// 更新标签值
+export function updateTagName(tag) {
+    return httpInstance({
+        url: `/tag`,
+        method: 'put',
+        data: tag
+    })
+}
+'''
+@bp.route('/tag',methods=['put'])
+def update_user_tag():
+    data = json_response(request)
+    tag = data.get('name')
+    tagId = data.get('tagId')
+    old_tag = data.get('oldName')
+    # print("修改标签：",tag)
+    # print("tagId：" ,tagId)
+    # print("old_tag：" ,old_tag)
+    result_sponse,result_code = update_user_tag_db(tag,tagId,old_tag)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Tag not updated'})
+
+    return jsonify({'code':200,'msg':'Tag updated successfully','msg':result_sponse})
+
+    # return jsonify({'code':200,'msg':'Tag updated successfully'})
+
+# 获取用户标签
+'''
+//获取用户标签信息
+export function getUserTagList(uid) {
+    return httpInstance({
+        url: `/tag/tagList`,
+        method: 'post',
+        data: {
+            uid: uid
+        }
+    })
+}
+
+// 加载参数
+loadTagsData = async () => {
+  const res = await getUserTagList(props.userId);
+  tagsData.value = res.data.pageInfo.list;
+};
+loadTagsData();
+'''
+@bp.route('/tag/tagList',methods=['post'])
+def get_user_tag_list():
+    data = json_response(request)
+    uid = data.get('uid')
+    # print("获取用户标签：",uid)
+    result_sponse,result_code = get_user_tag_list_db(uid)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Tag not found'})
+
+    return jsonify({'code':200,'msg':'Tag found successfully','data':result_sponse})
+
+# 删除用户标签
+'''
+// 删除标签
+const handleDelete = (tagId) => {
+  deleteTag(tagId).then((res) => {
+    msg.value = ''
+    msg.value = res.msg
+    loadTagsData();
+  })
+  alert("模拟删除");
+};
+
+// 删除一个标签
+export function deleteTag(tagId) {
+    return httpInstance({
+        url: `/tag/${tagId}`,
+        method: 'delete',
+    })
+}
+'''
+@bp.route('/tag/<int:tagId>',methods=['delete'])
+def delete_user_tag(tagId):
+    # print("删除标签：",tagId)
+    result_sponse,result_code = delete_user_tag_db(tagId)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Tag not deleted'})
+
+    return jsonify({'code':200,'msg':'Tag deleted successfully','msg':result_sponse})
