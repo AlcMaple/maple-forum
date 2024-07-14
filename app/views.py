@@ -21,7 +21,7 @@ session = {
 @bp.route('/register',methods=['POST'])
 def register():
     data = json_response(request)
-    # print("data：",data)
+    print("data：",data)
     username = data.get('username')
     password = data.get('password')
     email = data.get('email')
@@ -61,7 +61,7 @@ def send_verification_code():
     sendOK, info, apiStatus = Config.sms.send(verification_phone, 0, {'code': verification_code})
     # apiStatus = '200'
     print(sendOK) # 是否成功(布尔值)
-    # print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
+    print('apiStatus:', apiStatus, 'type:', type(apiStatus)) # api状态码
     # print(info) # 描述信息 
     if apiStatus == '200':
         print('短信发送成功')
@@ -115,7 +115,7 @@ def user():
     # print('avator：',image_data)
     # 解码base64字符串为二进制数据
     decoded_data = base64.b64decode(image_data)
-    # print('decoded_data：',decoded_data)
+    print('decoded_data：',decoded_data)
 
     # download_image(decoded_data,uid)
 
@@ -127,13 +127,13 @@ def user():
     # avator_path = get_avatar_path(uid)
     # print('avator_path:',avator_path)
 
-    # result_sponse,result_code = update_user(uid,nickname,email,description,avator_path)
-    # if result_code == 200:
-    #     return jsonify({'code':0,'msg':'User updated successfully'})
-    # else:
-    #     return jsonify({'code':400,'msg':'User update failed'})
+    result_sponse,result_code = update_user(uid,nickname,email,description,decoded_data)
+    if result_code == 200:
+        return jsonify({'code':0,'msg':'User updated successfully'})
+    else:
+        return jsonify({'code':400,'msg':'User update failed'})
     
-    return jsonify({'code':0,'msg':'User updated successfully'})
+    # return jsonify({'code':0,'msg':'User updated successfully'})
 
 # 获取用户信息
 @bp.route('/user',methods=['post'])
@@ -251,7 +251,7 @@ def get_article_list():
     # print("get_article_list：",data)
     uid = data.get('uid')
     result_sponse,result_code = get_article_list_db(uid)
-    # print(result_sponse,result_code)
+    print(result_sponse,result_code)
 
     return jsonify({'code':200,'msg':'Article list found successfully','articleList':result_sponse})
 
@@ -639,21 +639,6 @@ def get_search():
 
     return jsonify({'code':200,'msg':'Search found successfully','data':result_sponse})
 
-# 获取用户标签
-'''
-getUserTagList(userData.value[0].uid).then(res => {
-    console.log('用户主页',res);
-    tags.value=res.data.pageInfo.list
-});
-
-export function getUserTagList() {
-    return httpInstance({
-        url: `/tag/tagList`,
-        method: 'get',
-    })
-}
-'''
-
 # 新增用户标签
 '''
 postNewTag(tag.value).then((res) => {
@@ -777,3 +762,36 @@ def delete_user_tag(tagId):
         return jsonify({'code':400,'msg':'Tag not deleted'})
 
     return jsonify({'code':200,'msg':'Tag deleted successfully','msg':result_sponse})
+
+# 删除评论
+'''
+// 删除一个回复消息
+const deleteMag = (comId) => {
+  if (code.value != 0) {
+    router.push({
+      path: "/login",
+    });
+  }
+  deleteSendMag(comId).then(res => {
+      location.reload();
+      // console.log('删除评论', res)
+  });
+  // alert("模拟删除");
+};
+
+// 删除评论信息
+export function deleteSendMag(comId) {
+    return httpInstance({
+        url: `/comment/${comId}`,
+        method: 'delete',
+    });
+}
+'''
+@bp.route('/comment/<int:comId>',methods=['delete'])
+def delete_comment(comId):
+    # print("删除评论：",comId)
+    result_sponse,result_code = delete_comment_db(comId)
+    if result_code != 200:
+        return jsonify({'code':400,'msg':'Comment not deleted'})
+
+    return jsonify({'code':200,'msg':'Comment deleted successfully','msg':result_sponse})

@@ -12,10 +12,13 @@ def create_connection():
     try:
         connect=pymysql.Connect(
             host='localhost',
-            port=3306,
-            user='your_username',
-            passwd='your_password',
-            db='your_database_name',
+            port=7777,
+            user='root',
+            passwd='loveat2024a+.',
+            db='forum',
+            # user='your_username',
+            # passwd='your_password',
+            # db='your_database_name',
             charset='utf8'
         )
         cursor=connect.cursor()
@@ -125,6 +128,20 @@ def login_user(username, password):
 def update_user(user_id, user_name, email, description,avator_path):
     connection = create_connection()
     cursor = connection.cursor()
+    cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+    result = cursor.fetchone()
+    if not result:
+        cursor.close()
+        return jsonify({'error': 'User does not exist'}), 400
+    
+    if user_name == '':
+        user_name = result[6]
+    if email == '':
+        email = result[2]
+    if description == '':
+        description = result[5]
+    if avator_path == b'':
+        avator_path = result[7]
 
     cursor.execute("update users set user_name=%s, email=%s, description=%s, image=%s where id=%s", (user_name, email, description,avator_path, user_id))
     connection.commit()
@@ -1106,3 +1123,34 @@ def delete_user_tag_db(tagId):
     cursor.close()
     return "标签删除成功",200
 
+# 删除评论
+'''
+// 删除一个回复消息
+const deleteMag = (comId) => {
+  if (code.value != 0) {
+    router.push({
+      path: "/login",
+    });
+  }
+  deleteSendMag(comId).then(res => {
+      location.reload();
+      // console.log('删除评论', res)
+  });
+  // alert("模拟删除");
+};
+
+// 删除评论信息
+export function deleteSendMag(comId) {
+    return httpInstance({
+        url: `/comment/${comId}`,
+        method: 'delete',
+    });
+}
+'''
+def delete_comment_db(comId):
+    connection = create_connection()
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM comments WHERE com_id = %s", (comId,))
+    connection.commit()
+    cursor.close()
+    return "评论删除成功",200
